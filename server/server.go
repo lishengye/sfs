@@ -40,7 +40,7 @@ func (server *Server) Run() error {
 		conn, err := server.Listener.Accept()
 		if err != nil {
 			log.Error("Aceep error: %s, failed: %d", err.Error(), failed)
-			if failed++;failed > 5 {
+			if failed++; failed > 5 {
 				break
 			}
 			continue
@@ -55,4 +55,5 @@ func (server *Server) Run() error {
 			clientHandler.Handle()
 		}()
 	}
+	return nil
 }

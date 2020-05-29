@@ -33,7 +33,7 @@ func PutUint32(a uint32) []byte {
 }
 
 func PutUint64(a uint64) []byte {
-	b := make([]byte, 4)
-	binary.BigEndian.PutUint32(b, a)
+	b := make([]byte, 8)
+	binary.BigEndian.PutUint64(b, a)
 	return b
 }

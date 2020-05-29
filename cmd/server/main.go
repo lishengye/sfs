@@ -1,6 +1,5 @@
 package main
 
-
 import (
 	"flag"
 	"github.com/lishengye/sfs/log"
@@ -24,4 +23,3 @@ func main() {
 		log.Error("Server exit error")
 	}
 }
-

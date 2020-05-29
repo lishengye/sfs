@@ -226,7 +226,7 @@ func (clientHandler *ClientHandler) Upload(req []byte) error {
 	fileSize := binary.BigEndian.Uint64(req[16:24])
 	fileName := string(req[24:])
 	_, err := os.Stat(filepath.Join(clientHandler.Config.Directory, fileName))
-	if  err == nil {
+	if err == nil {
 		errMsg := "Upload File exist"
 		res := append([]byte{1}, []byte(errMsg)...)
 		if err := clientHandler.connection.SendMsg(res); err != nil {
@@ -242,7 +242,7 @@ func (clientHandler *ClientHandler) Upload(req []byte) error {
 	fileTransfer := FileTransfer{
 		connection:   clientHandler.connection,
 		FileName:     fileName,
-		FileSize: 	  fileSize,
+		FileSize:     fileSize,
 		DownloadPath: clientHandler.Config.Directory,
 	}
 
@@ -254,12 +254,11 @@ func (clientHandler *ClientHandler) Upload(req []byte) error {
 	return nil
 }
 
-
 /*
 	|	8	 |
 	|   exit |
 
- */
+*/
 func (clientHandler *ClientHandler) Exit() error {
 	res := append([]byte{0}, []byte("ok")...)
 	if err := clientHandler.connection.SendMsg(res); err != nil {

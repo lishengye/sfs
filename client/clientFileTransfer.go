@@ -24,7 +24,7 @@ res
 	|   0	|  "ok"	|
 */
 func (fileTransfer *FileTransfer) SendFile() error {
-	File, err := os.Open(filepath.Join(fileTransfer.DownloadPath, fileTransfer.FileName));
+	File, err := os.Open(filepath.Join(fileTransfer.DownloadPath, fileTransfer.FileName))
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func (fileTransfer *FileTransfer) SendFile() error {
 			end = fileTransfer.FileSize
 		}
 
-		req := make([]byte, 24 + end - start)
+		req := make([]byte, 24+end-start)
 		copy(req[0:8], sfs.MethodUploading)
 
 		copy(req[8:16], sfs.PutUint64(start))
@@ -93,7 +93,6 @@ func (fileTransfer *FileTransfer) SendFile() error {
 	return nil
 }
 
-
 /*
 
 req:
@@ -137,9 +136,8 @@ func (fileTransfer *FileTransfer) ReceiveFile() error {
 
 		content := res[1:]
 
-
 		File, err := os.OpenFile(filepath.Join(fileTransfer.DownloadPath, tempFile),
-			os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0644)
+			os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 		if err != nil {
 			return err
 		}
@@ -149,8 +147,8 @@ func (fileTransfer *FileTransfer) ReceiveFile() error {
 			return errors.New("Size unmatch")
 		}
 
-		_, err = File.Write(content);
-		if  err != nil {
+		_, err = File.Write(content)
+		if err != nil {
 			return err
 		}
 

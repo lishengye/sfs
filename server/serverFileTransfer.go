@@ -27,7 +27,7 @@ res:
 */
 
 func (fileTransfer *FileTransfer) SendFile() error {
-	File, err := os.Open(filepath.Join(fileTransfer.DownloadPath, fileTransfer.FileName));
+	File, err := os.Open(filepath.Join(fileTransfer.DownloadPath, fileTransfer.FileName))
 	if err != nil {
 		return err
 	}
@@ -105,7 +105,7 @@ func (fileTransfer *FileTransfer) ReceiveFile() error {
 		method := string(req[0:8])
 
 		File, err := os.OpenFile(filepath.Join(fileTransfer.DownloadPath, tempFile),
-			os.O_APPEND | os.O_WRONLY | os.O_CREATE, 0644)
+			os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 		if err != nil {
 			log.Error("Open tempfile error: %s", err.Error())
 			return errors.New("open tempfile error")
@@ -122,8 +122,8 @@ func (fileTransfer *FileTransfer) ReceiveFile() error {
 			log.Info("ReceiveFile write %d:%d chunk to %s", start, end, fileTransfer.FileName+".temp")
 
 			content := req[24:]
-			_, err := File.Write(content);
-			if  err != nil {
+			_, err := File.Write(content)
+			if err != nil {
 				log.Error("ReceiveFile write to tempfile error: %s", err.Error())
 				return errors.New("ReceiveFile write to tempfile error")
 			}
@@ -151,8 +151,8 @@ func (fileTransfer *FileTransfer) ReceiveFile() error {
 
 			if err := os.Rename(filepath.Join(fileTransfer.DownloadPath, tempFile),
 				filepath.Join(fileTransfer.DownloadPath, fileTransfer.FileName)); err != nil {
-					log.Error("Receive Rename error")
-					return errors.New("Rename error")
+				log.Error("Receive Rename error")
+				return errors.New("Rename error")
 			}
 			break
 		} else {

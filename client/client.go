@@ -8,23 +8,20 @@ import (
 
 type Client struct {
 	Connection *sfs.Connection
-	token  	   string
+	token      string
 	username   string
 	password   string
 }
 
-
 func NewClient() *Client {
-	return &Client{
-
-	}
+	return &Client{}
 }
 
 func (client *Client) Handshake() error {
 
 	user := []byte(client.username)
 	pass := []byte(client.password)
-	req := make([]byte, 8 + 4 + len(user) + 4 + len(pass))
+	req := make([]byte, 8+4+len(user)+4+len(pass))
 
 	copy(req[0:8], []byte(sfs.MethodConnect))
 
@@ -55,7 +52,7 @@ func (client *Client) Handshake() error {
 }
 
 func (client *Client) List() (string, error) {
-	req := make([]byte, 8 + 8)
+	req := make([]byte, 8+8)
 	copy(req[0:8], []byte(sfs.MethodList))
 
 	copy(req[8:16], []byte(client.token))
@@ -77,7 +74,7 @@ func (client *Client) List() (string, error) {
 
 func (client *Client) Download(fileName string) error {
 
-	req := make([]byte, 8 + 8 + len(fileName))
+	req := make([]byte, 8+8+len(fileName))
 
 	copy(req[0:8], []byte(sfs.MethodDownload))
 
@@ -112,7 +109,7 @@ func (client *Client) Download(fileName string) error {
 }
 
 func (client *Client) Upload(fileName string, fileSize uint64) error {
-	req := make([]byte, 8 + 8 + 8 + len(fileName))
+	req := make([]byte, 8+8+8+len(fileName))
 
 	copy(req[0:8], []byte(sfs.MethodUpload))
 
@@ -139,9 +136,8 @@ func (client *Client) Upload(fileName string, fileSize uint64) error {
 
 	fileTransfer := FileTransfer{
 		connection: client.Connection,
-		FileName: fileName,
-		FileSize: fileSize,
-
+		FileName:   fileName,
+		FileSize:   fileSize,
 	}
 
 	err := fileTransfer.SendFile()
