@@ -20,7 +20,7 @@ type ClientHandler struct {
 func (clientHandler *ClientHandler) Handle() {
 	defer clientHandler.connection.Conn.Close()
 
-	if err := clientHandler.handShake(); err != nil {
+	if err := clientHandler.HandShake(); err != nil {
 		log.Error("Handshake error: %s", err.Error())
 		return
 	}
@@ -36,13 +36,13 @@ func (clientHandler *ClientHandler) Handle() {
 		var err error
 		switch string(data[:8]) {
 		case sfs.MethodList:
-			err = clientHandler.list(data)
+			err = clientHandler.List(data)
 		case sfs.MethodDownload:
-			err = clientHandler.download(data)
+			err = clientHandler.Download(data)
 		case sfs.MethodUpload:
-			err = clientHandler.upload(data)
+			err = clientHandler.Upload(data)
 		case sfs.MethodExit:
-			err = clientHandler.exit()
+			err = clientHandler.Exit()
 			return
 		}
 		if err != nil {
@@ -61,7 +61,7 @@ res:
 	|0/1 |  "token"/err    |
 
 */
-func (clientHandler *ClientHandler) handShake() error {
+func (clientHandler *ClientHandler) HandShake() error {
 	req := make([]byte, 0)
 	if err := clientHandler.connection.ReceiveMsg(req); err != nil {
 		log.Error("Handshake ReceiveMsg error: %s", err.Error())
@@ -117,7 +117,7 @@ list 	token
 0/1	res/errMsg
 
 */
-func (clientHandler *ClientHandler) list(req []byte) error {
+func (clientHandler *ClientHandler) List(req []byte) error {
 	// check req len
 	if len(req) != 16 {
 		log.Error("List data lenth not 16, len: %v", len(req))
@@ -152,17 +152,18 @@ func (clientHandler *ClientHandler) list(req []byte) error {
 
 /*
 1:
-	|	8	|	8		|   xxxx  |
+	|	8	|	8		|   xxxx  |		xxxx    |
 	|	download	|  token 	|	file_name	|
 
 	|	1		|	xxx		|
-	|	0/1	| 	"ok"/msg 	|
+	|	1		| 	errMsg 	|
+	|	0		|   fileSize|
 
 2:
 	tranfor file
 
 */
-func (clientHandler *ClientHandler) download(req []byte) error {
+func (clientHandler *ClientHandler) Download(req []byte) error {
 
 	if token := string(req[8:]); token != clientHandler.token {
 		log.Error("Download invalid token: %s, %s", clientHandler.token, token)
@@ -180,7 +181,9 @@ func (clientHandler *ClientHandler) download(req []byte) error {
 		}
 	}
 
-	res := append([]byte{0}, []byte("ok")...)
+	temp := make([]byte, 8)
+	binary.BigEndian.PutUint64(temp, uint64(v.Size()))
+	res := append([]byte{0}, temp...)
 	if err := clientHandler.connection.SendMsg(res); err != nil {
 		log.Error("Download SendMsg error: %s", err.Error())
 		return errors.New("Download SendMsg error")
@@ -213,8 +216,7 @@ func (clientHandler *ClientHandler) download(req []byte) error {
 	tranfor file
 
 */
-
-func (clientHandler *ClientHandler) upload(req []byte) error {
+func (clientHandler *ClientHandler) Upload(req []byte) error {
 	if string(req[8:]) != clientHandler.token {
 		errMsg := "Invalid token"
 		fmt.Println(errMsg)
@@ -252,7 +254,13 @@ func (clientHandler *ClientHandler) upload(req []byte) error {
 	return nil
 }
 
-func (clientHandler *ClientHandler) exit() error {
+
+/*
+	|	8	 |
+	|   exit |
+
+ */
+func (clientHandler *ClientHandler) Exit() error {
 	res := append([]byte{0}, []byte("ok")...)
 	if err := clientHandler.connection.SendMsg(res); err != nil {
 		log.Error("Exit SendMsg error: %s", err.Error())

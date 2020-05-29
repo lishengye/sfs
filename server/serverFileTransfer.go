@@ -20,8 +20,8 @@ type FileTransfer struct {
 /*
 
 req:
-	| 8 | 8 | 8 |  xxx |
-	| downing/ downloaded | start | end | file_name|
+	| 8 | 8 | 8 |
+	| downing/ downloaded | start | end |
 res:
 	| 0 | xxx|
 */
@@ -85,10 +85,12 @@ func (fileTransfer *FileTransfer) SendFile() error {
 }
 
 /*
-
+req
 	| 8 | 8 | 8 | xxx |
 	| uping | start | end | bytes |
-
+res
+	|	1   |	xxx	|
+	|   0	|  "ok"	|
 */
 func (fileTransfer *FileTransfer) ReceiveFile() error {
 	log.Info("ReceiveFile: %s starting", fileTransfer.FileName)
