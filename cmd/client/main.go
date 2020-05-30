@@ -20,6 +20,7 @@ func main() {
 		return
 	}
 
+	cli.Print("Enter password")
 	pass := cli.GetComand()[0]
 
 

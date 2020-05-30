@@ -20,7 +20,7 @@ func NewConnection(conn net.Conn) *Connection {
 // write data in one msg
 func (connection *Connection) SendMsg(data []byte) error {
 	sent := 0
-	total := len(data)
+	total := len(data) + 4
 	head := make([]byte, 4)
 	binary.BigEndian.PutUint32(head, uint32(total))
 	data = append(head, data...)
