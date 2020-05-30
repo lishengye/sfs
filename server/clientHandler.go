@@ -69,7 +69,7 @@ func (clientHandler *ClientHandler) HandShake() error {
 
 	method := string(req[:8])
 	if method != sfs.MethodConnect {
-		log.Error("Handshake not connect command: %s", method)
+		log.Error("Handshake not connect command: %s, %s", method, sfs.MethodConnect)
 		return errors.New("invalid command")
 	}
 

@@ -2,6 +2,7 @@ package sfs
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -42,6 +43,9 @@ func (connection *Connection) ReceiveMsg() ([]byte, error){
 	head := make([]byte, 4)
 	connection.Conn.Read(head[0:4])
 	total := binary.BigEndian.Uint32(head)
+	if total == 0 {
+		return nil, errors.New("error reading")
+	}
 	buf := make([]byte, total)
 	_, err := io.ReadFull(connection.Conn, buf)
 	if err != nil {
