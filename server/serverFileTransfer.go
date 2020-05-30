@@ -35,8 +35,8 @@ func (fileTransfer *FileTransfer) SendFile() error {
 	log.Info("SendFile: %s starting", fileTransfer.FileName)
 
 	for {
-		req := make([]byte, 0)
-		if err := fileTransfer.connection.ReceiveMsg(req); err != nil {
+		req, err := fileTransfer.connection.ReceiveMsg();
+		if  err != nil {
 			log.Error("SendFile receivemsg error: %s", err)
 			return errors.New("SendFile receivemsg error")
 		}
@@ -97,8 +97,8 @@ func (fileTransfer *FileTransfer) ReceiveFile() error {
 	tempFile := fileTransfer.FileName + ".temp"
 
 	for {
-		req := make([]byte, 0)
-		if err := fileTransfer.connection.ReceiveMsg(req); err != nil {
+		req, err := fileTransfer.connection.ReceiveMsg();
+		if err != nil {
 			log.Error("ReceiveFile receivemsg error: %s", err.Error())
 			return errors.New("ReceiveFile receivemsg error")
 		}

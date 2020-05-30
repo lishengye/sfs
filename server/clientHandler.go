@@ -27,13 +27,12 @@ func (clientHandler *ClientHandler) Handle() {
 	log.Info("Handshake successfully")
 
 	for {
-		data := make([]byte, 0)
-		if err := clientHandler.connection.ReceiveMsg(data); err != nil {
+		data, err := clientHandler.connection.ReceiveMsg();
+		if  err != nil {
 			log.Error("Receive command error")
 			return
 		}
 
-		var err error
 		switch string(data[:8]) {
 		case sfs.MethodList:
 			err = clientHandler.List(data)
@@ -62,8 +61,8 @@ res:
 
 */
 func (clientHandler *ClientHandler) HandShake() error {
-	req := make([]byte, 0)
-	if err := clientHandler.connection.ReceiveMsg(req); err != nil {
+	req, err := clientHandler.connection.ReceiveMsg();
+	if err != nil {
 		log.Error("Handshake ReceiveMsg error: %s", err.Error())
 		return errors.New("ReceiveMsg error")
 	}

@@ -20,9 +20,10 @@ func NewConnection(conn net.Conn) *Connection {
 // write data in one msg
 func (connection *Connection) SendMsg(data []byte) error {
 	sent := 0
-	total := len(data) + 4
+	total := len(data)
 	head := make([]byte, 4)
 	binary.BigEndian.PutUint32(head, uint32(total))
+	total += 4
 	data = append(head, data...)
 	for sent < total {
 		size := int(Min(total-sent, 8096))
@@ -37,13 +38,16 @@ func (connection *Connection) SendMsg(data []byte) error {
 }
 
 // read one msg
-func (connection *Connection) ReceiveMsg(data []byte) error {
+func (connection *Connection) ReceiveMsg() ([]byte, error){
 	head := make([]byte, 4)
 	connection.Conn.Read(head[0:4])
 	total := binary.BigEndian.Uint32(head)
-	readed := 0
-	buf := make([]byte, BUF_SIZE)
-	for readed < int(total) {
+	buf := make([]byte, total)
+	_, err := io.ReadFull(connection.Conn, buf)
+	if err != nil {
+		return buf, err
+	}
+	/*for readed < int(total) {
 		n, err := connection.Conn.Read(buf)
 		// 先判断n是否为0,再考虑error。参考io.Reader接口
 		if n > 0 {
@@ -55,6 +59,6 @@ func (connection *Connection) ReceiveMsg(data []byte) error {
 			fmt.Println(err)
 			return err
 		}
-	}
-	return nil
+	}*/
+	return buf, nil
 }

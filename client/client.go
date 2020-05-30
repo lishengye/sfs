@@ -47,8 +47,8 @@ func (client *Client) Handshake(username, password string) error {
 		return err
 	}
 
-	res := make([]byte, 0)
-	if err := client.Connection.ReceiveMsg(res); err != nil {
+	res, err := client.Connection.ReceiveMsg()
+	if err != nil {
 		return err
 	}
 
@@ -70,8 +70,8 @@ func (client *Client) List() (string, error) {
 		return "", err
 	}
 
-	res := make([]byte, 0)
-	if err := client.Connection.ReceiveMsg(res); err != nil {
+	res, err := client.Connection.ReceiveMsg()
+	if err != nil {
 		return "", err
 	}
 
@@ -95,8 +95,8 @@ func (client *Client) Download(fileName string) error {
 		return err
 	}
 
-	res := make([]byte, 0)
-	if err := client.Connection.ReceiveMsg(res); err != nil {
+	res, err := client.Connection.ReceiveMsg()
+	if err != nil {
 		return err
 	}
 
@@ -112,7 +112,7 @@ func (client *Client) Download(fileName string) error {
 		FileName:   fileName,
 	}
 
-	err := fileTransfer.ReceiveFile()
+	err = fileTransfer.ReceiveFile()
 
 	return err
 }
@@ -134,8 +134,8 @@ func (client *Client) Upload(fileName string, fileSize uint64) error {
 		return err
 	}
 
-	res := make([]byte, 0)
-	if err := client.Connection.ReceiveMsg(res); err != nil {
+	res, err := client.Connection.ReceiveMsg()
+	if err != nil {
 		return err
 	}
 
@@ -149,7 +149,7 @@ func (client *Client) Upload(fileName string, fileSize uint64) error {
 		FileSize:   fileSize,
 	}
 
-	err := fileTransfer.SendFile()
+	err = fileTransfer.SendFile()
 
 	return err
 }
@@ -163,8 +163,8 @@ func (client *Client) Exit() error {
 		return err
 	}
 
-	res := make([]byte, 0)
-	if err := client.Connection.ReceiveMsg(res); err != nil {
+	res, err := client.Connection.ReceiveMsg()
+	if err != nil {
 		return err
 	}
 

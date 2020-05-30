@@ -62,8 +62,8 @@ func (fileTransfer *FileTransfer) SendFile() error {
 			return err
 		}
 
-		res := make([]byte, 0)
-		if err := fileTransfer.connection.ReceiveMsg(req); err != nil {
+		res, err := fileTransfer.connection.ReceiveMsg()
+		if err != nil {
 			return err
 		}
 
@@ -82,8 +82,8 @@ func (fileTransfer *FileTransfer) SendFile() error {
 		return err
 	}
 
-	res := make([]byte, 0)
-	if err := fileTransfer.connection.ReceiveMsg(req); err != nil {
+	res, err := fileTransfer.connection.ReceiveMsg()
+	if err != nil {
 		return err
 	}
 	if res[0] != 0 {
@@ -126,8 +126,8 @@ func (fileTransfer *FileTransfer) ReceiveFile() error {
 			return err
 		}
 
-		res := make([]byte, 0)
-		if err := fileTransfer.connection.ReceiveMsg(res); err != nil {
+		res, err := fileTransfer.connection.ReceiveMsg()
+		if err != nil {
 			return err
 		}
 		if res[0] != 0 {
@@ -166,8 +166,8 @@ func (fileTransfer *FileTransfer) ReceiveFile() error {
 		return err
 	}
 
-	res := make([]byte, 0)
-	if err := fileTransfer.connection.ReceiveMsg(req); err != nil {
+	res, err := fileTransfer.connection.ReceiveMsg()
+	if err != nil {
 		return err
 	}
 	if res[0] != 0 {
