@@ -9,13 +9,17 @@ import "os"
 
 func main() {
 	configFile := flag.String("c", "", "specific config file ")
+	flag.Parse()
 	if *configFile == "" {
 		log.Error("No config file")
 		os.Exit(-1)
 	}
-	flag.Parse()
-	// TODO parse configuration from file
-	config := server.NewConfig(1234, "/sssss")
+
+	config, err := server.NewConfig(*configFile)
+	if err != nil {
+		log.Error("Read ConfigFile error")
+		return
+	}
 	sfsServer := server.NewServer(config)
 	log.Info("Starting Server")
 

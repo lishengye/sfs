@@ -4,23 +4,32 @@ import (
 	"encoding/binary"
 	"errors"
 	"github.com/lishengye/sfs"
+	"net"
 )
 
 type Client struct {
 	Connection *sfs.Connection
 	token      string
-	username   string
-	password   string
 }
 
 func NewClient() *Client {
 	return &Client{}
 }
 
-func (client *Client) Handshake() error {
+func (client *Client) Connect(ip, port string) error {
+	conn, err := net.Dial("tcp", ip+":"+port)
+	if err != nil {
+		return err
+	}
 
-	user := []byte(client.username)
-	pass := []byte(client.password)
+	client.Connection = sfs.NewConnection(conn)
+	return nil
+}
+
+func (client *Client) Handshake(username, password string) error {
+
+	user := []byte(username)
+	pass := []byte(password)
 	req := make([]byte, 8+4+len(user)+4+len(pass))
 
 	copy(req[0:8], []byte(sfs.MethodConnect))
