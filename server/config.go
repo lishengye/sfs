@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 )
 
@@ -21,5 +22,21 @@ func NewConfig(configFile string) (Config, error) {
 	if err := decoder.Decode(&config);err != nil {
 		return config, err
 	}
+
+	if err := config.check(); err != nil {
+		return config, err
+	}
+
 	return config, nil
+}
+
+func (config *Config) check() error {
+	file, err := os.Stat(config.Directory)
+	if err != nil {
+		return fmt.Errorf("Config error: %s not exist", config.Directory)
+	}
+	if !file.IsDir() {
+		return fmt.Errorf("Config error: %s not directory", file.Name())
+	}
+	return nil
 }

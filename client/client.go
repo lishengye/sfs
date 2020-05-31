@@ -10,11 +10,9 @@ import (
 type Client struct {
 	Connection *sfs.Connection
 	token      string
+	Cli        *Cli
 }
 
-func NewClient() *Client {
-	return &Client{}
-}
 
 func (client *Client) Connect(ip, port string) error {
 	conn, err := net.Dial("tcp", ip+":"+port)
@@ -101,6 +99,10 @@ func (client *Client) Download(fileName string) error {
 	}
 
 	if err := client.checkOk(res); err != nil {
+		if res[0] == 2 {
+			client.Cli.Warn(err.Error())
+			return nil
+		}
 		return err
 	}
 
@@ -108,6 +110,7 @@ func (client *Client) Download(fileName string) error {
 
 	fileTransfer := FileTransfer{
 		connection: client.Connection,
+		Cli:		client.Cli,
 		FileSize:   fileSize,
 		FileName:   fileName,
 	}
@@ -140,11 +143,16 @@ func (client *Client) Upload(fileName string, fileSize uint64) error {
 	}
 
 	if err := client.checkOk(res); err != nil {
-		return err
+		if res[0] == 3 {
+			client.Cli.Warn(err.Error())
+		} else {
+			return err
+		}
 	}
 
 	fileTransfer := FileTransfer{
 		connection: client.Connection,
+		Cli:  		client.Cli,
 		FileName:   fileName,
 		FileSize:   fileSize,
 	}

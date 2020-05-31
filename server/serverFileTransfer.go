@@ -32,7 +32,7 @@ func (fileTransfer *FileTransfer) SendFile() error {
 		return err
 	}
 
-	log.Info("SendFile: %s starting", fileTransfer.FileName)
+	log.Info("SendFile starting: %s", fileTransfer.FileName)
 
 	for {
 		req, err := fileTransfer.connection.ReceiveMsg();
@@ -42,12 +42,11 @@ func (fileTransfer *FileTransfer) SendFile() error {
 		}
 
 		method := string(req[0:8])
-		if method == sfs.MethodDownloading {
-			fileName := string(req[0:8])
+		if method[:len(sfs.MethodDownloading)] == sfs.MethodDownloading {
 			start, end := binary.BigEndian.Uint64(req[8:16]), binary.BigEndian.Uint64(req[16:24])
 
-			if fileName != fileTransfer.FileName || end > uint64(fileTransfer.FileSize) {
-				log.Error("invalid argument fileName: %s, start: %d, end: %d", fileName, start, end)
+			if end > uint64(fileTransfer.FileSize) {
+				log.Error("invalid argument start: %d, end: %d", start, end)
 				return errors.New("invalid argument")
 			}
 
@@ -66,7 +65,7 @@ func (fileTransfer *FileTransfer) SendFile() error {
 			if err := fileTransfer.connection.SendMsg(res); err != nil {
 				return errors.New("error")
 			}
-		} else if method == sfs.MethodDownloadCompleted {
+		} else if method[:len(sfs.MethodDownloadCompleted)] == sfs.MethodDownloadCompleted {
 			res := append([]byte{0}, []byte("ok")...)
 			if err := fileTransfer.connection.SendMsg(res); err != nil {
 				log.Error("SendFile Sendmsg error")
@@ -93,7 +92,7 @@ res
 	|   0	|  "ok"	|
 */
 func (fileTransfer *FileTransfer) ReceiveFile() error {
-	log.Info("ReceiveFile: %s starting", fileTransfer.FileName)
+	log.Info("ReceiveFile starting: %s", fileTransfer.FileName)
 	tempFile := fileTransfer.FileName + ".temp"
 
 	for {
@@ -112,7 +111,7 @@ func (fileTransfer *FileTransfer) ReceiveFile() error {
 		}
 		v, _ := File.Stat()
 
-		if method == sfs.MethodUploading {
+		if method[:len(sfs.MethodUploading)] == sfs.MethodUploading {
 			start, end := binary.BigEndian.Uint64(req[8:16]), binary.BigEndian.Uint64(req[16:24])
 			if v.Size() != int64(start) {
 				log.Error("FileSize: %d, writing start: %d", v.Size(), start)
@@ -138,7 +137,7 @@ func (fileTransfer *FileTransfer) ReceiveFile() error {
 				log.Error("CloseFile error")
 				return errors.New("closefile error")
 			}
-		} else if method == sfs.MethodUploadCompleted {
+		} else if method[:len(sfs.MethodUploadCompleted)] == sfs.MethodUploadCompleted {
 			res := append([]byte{0}, []byte("ok")...)
 			if err := fileTransfer.connection.SendMsg(res); err != nil {
 				return errors.New("error")
@@ -161,6 +160,6 @@ func (fileTransfer *FileTransfer) ReceiveFile() error {
 		}
 
 	}
-	log.Info("ReceiveFile: %s successfully", fileTransfer.FileName)
+	log.Info("ReceiveFile successfully: %s ", fileTransfer.FileName)
 	return nil
 }

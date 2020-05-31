@@ -23,12 +23,16 @@ func (cli *Cli) Error(s string) {
 	fmt.Printf("[Error] %s\n", s)
 }
 
+func (cli *Cli) Warn(s string) {
+	fmt.Printf("[Warn] %s\n", s)
+}
+
 func (cli *Cli) Print(s string) {
 	fmt.Printf(s)
 }
 
 func (cli *Cli) PrintLn(s string) {
-	fmt.Printf(s)
+	fmt.Println(s)
 }
 
 func (cli *Cli) GetComand() []string {

@@ -44,7 +44,7 @@ func (connection *Connection) ReceiveMsg() ([]byte, error){
 	connection.Conn.Read(head[0:4])
 	total := binary.BigEndian.Uint32(head)
 	if total == 0 {
-		return nil, errors.New("error reading")
+		return nil, errors.New("Read failed, Network Error")
 	}
 	buf := make([]byte, total)
 	_, err := io.ReadFull(connection.Conn, buf)

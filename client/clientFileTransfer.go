@@ -10,6 +10,7 @@ import (
 
 type FileTransfer struct {
 	connection   *sfs.Connection
+	Cli			 *Cli
 	DownloadPath string
 	FileSize     uint64
 	FileName     string
@@ -31,7 +32,7 @@ func (fileTransfer *FileTransfer) SendFile() error {
 
 	start := uint64(0)
 	for {
-		if start > fileTransfer.FileSize {
+		if start >= fileTransfer.FileSize {
 			break
 		}
 
@@ -106,7 +107,7 @@ func (fileTransfer *FileTransfer) ReceiveFile() error {
 
 	start := uint64(0)
 	for {
-		if start > fileTransfer.FileSize {
+		if start >= fileTransfer.FileSize {
 			break
 		}
 
@@ -115,7 +116,7 @@ func (fileTransfer *FileTransfer) ReceiveFile() error {
 			end = fileTransfer.FileSize
 		}
 
-		req := make([]byte, 0)
+		req := make([]byte, 24)
 		copy(req[0:8], sfs.MethodDownloading)
 
 		copy(req[8:16], sfs.PutUint64(start))
@@ -174,5 +175,13 @@ func (fileTransfer *FileTransfer) ReceiveFile() error {
 		return errors.New("error")
 	}
 
+	if _, err := os.Stat(filepath.Join(fileTransfer.DownloadPath, fileTransfer.FileName)); err == nil {
+		fileTransfer.Cli.Warn("Overwriting file with the same name in server")
+	}
+	// todo downloadpath
+	if err := os.Rename(filepath.Join(fileTransfer.DownloadPath, tempFile),
+		filepath.Join(fileTransfer.DownloadPath, fileTransfer.FileName)); err != nil {
+		return errors.New("Rename tempfile error")
+	}
 	return nil
 }

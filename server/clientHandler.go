@@ -41,7 +41,11 @@ func (clientHandler *ClientHandler) Handle() {
 			err = clientHandler.Upload(data)
 		} else if method[:len(sfs.MethodExit)] == sfs.MethodExit {
 			err = clientHandler.Exit()
+			return
 		} else {
+			err = errors.New("invalid command")
+		}
+		if err != nil {
 			log.Error(err.Error())
 			return
 		}
@@ -115,6 +119,7 @@ list 	token
 
 */
 func (clientHandler *ClientHandler) List(req []byte) error {
+	log.Info("List handling")
 	// check req len
 	if len(req) != 16 {
 		log.Error("List data lenth not 16, len: %v", len(req))
@@ -134,16 +139,16 @@ func (clientHandler *ClientHandler) List(req []byte) error {
 		if v.IsDir() {
 			continue
 		}
-		result += fmt.Sprintf("%s %s", string(v.Size())+"B", v.Name())
+		result += fmt.Sprintf("%s  %dB\n", v.Name(), v.Size())
 	}
 
 	// response
-	res := []byte{0}
-	res = append(res, []byte(result)...)
+	res := append([]byte{0}, []byte(result)...)
 	if err := clientHandler.connection.SendMsg(res); err != nil {
 		log.Error("List SendMsg error: %s", err.Error())
 		return errors.New("List SendMsg error")
 	}
+	log.Info("List successfully: %s", clientHandler.Config.Directory)
 	return nil
 }
 
@@ -161,26 +166,36 @@ func (clientHandler *ClientHandler) List(req []byte) error {
 
 */
 func (clientHandler *ClientHandler) Download(req []byte) error {
-
-	if token := string(req[8:]); token != clientHandler.token {
+	if token := string(req[8:16]); token != clientHandler.token {
 		log.Error("Download invalid token: %s, %s", clientHandler.token, token)
 		return errors.New("download invalid token")
 	}
 
 	fileName := string(req[16:])
-	v, err := os.Stat(fileName)
+	log.Info("Download handling: %s", fileName)
+	v, err := os.Stat(filepath.Join(clientHandler.Config.Directory, fileName))
 	if err != nil || v.IsDir() {
-		errMsg := "File not found or download directory"
-		res := append([]byte{0}, []byte(errMsg)...)
+		errMsg := "File not found or downloading a directory"
+		res := append([]byte{2}, []byte(errMsg)...)
 		if err := clientHandler.connection.SendMsg(res); err != nil {
 			log.Error("Download SendMsg error: %s", err.Error())
 			return errors.New("Download SendMsg error")
 		}
+		log.Warn("Download handling Warning %s : %s", errMsg, fileName)
+		return nil
+	}
+	if v.Size() == 0 {
+		errMsg := "Target file empty"
+		res := append([]byte{2}, []byte(errMsg)...)
+		if err := clientHandler.connection.SendMsg(res); err != nil {
+			log.Error("Download SendMsg error: %s", err.Error())
+			return errors.New("Download SendMsg error")
+		}
+		log.Warn("Download handling Warning %s : %s", errMsg, fileName)
+		return nil
 	}
 
-	temp := make([]byte, 8)
-	binary.BigEndian.PutUint64(temp, uint64(v.Size()))
-	res := append([]byte{0}, temp...)
+	res := append([]byte{0}, sfs.PutUint64(uint64(v.Size()))...)
 	if err := clientHandler.connection.SendMsg(res); err != nil {
 		log.Error("Download SendMsg error: %s", err.Error())
 		return errors.New("Download SendMsg error")
@@ -198,6 +213,7 @@ func (clientHandler *ClientHandler) Download(req []byte) error {
 		log.Error("Download send file error: %s", err.Error())
 		return errors.New("Download send file error")
 	}
+	log.Info("Download handle successful: %s", fileName)
 	return nil
 }
 
@@ -214,7 +230,7 @@ func (clientHandler *ClientHandler) Download(req []byte) error {
 
 */
 func (clientHandler *ClientHandler) Upload(req []byte) error {
-	if string(req[8:]) != clientHandler.token {
+	if string(req[8:16]) != clientHandler.token {
 		errMsg := "Invalid token"
 		fmt.Println(errMsg)
 		return errors.New(errMsg)
@@ -222,18 +238,21 @@ func (clientHandler *ClientHandler) Upload(req []byte) error {
 
 	fileSize := binary.BigEndian.Uint64(req[16:24])
 	fileName := string(req[24:])
+	log.Info("Upload handling: %s", fileName)
 	_, err := os.Stat(filepath.Join(clientHandler.Config.Directory, fileName))
 	if err == nil {
-		errMsg := "Upload File exist"
-		res := append([]byte{1}, []byte(errMsg)...)
+		errMsg := "Overwriting file with the same name in server"
+		log.Warn(errMsg + ":" + fileName)
+		res := append([]byte{3}, []byte(errMsg)...)
 		if err := clientHandler.connection.SendMsg(res); err != nil {
 			log.Error("Download SendMsg error: %s", err.Error())
 			return errors.New("Download SendMsg error")
 		}
-	}
-	if err := clientHandler.connection.SendMsg(append([]byte{0}, []byte("ok")...)); err != nil {
-		log.Error("Download SendMsg error: %s", err.Error())
-		return errors.New("Download SendMsg error")
+	} else {
+		if err := clientHandler.connection.SendMsg(append([]byte{0}, []byte("ok")...)); err != nil {
+			log.Error("Download SendMsg error: %s", err.Error())
+			return errors.New("Download SendMsg error")
+		}
 	}
 
 	fileTransfer := FileTransfer{
@@ -248,6 +267,7 @@ func (clientHandler *ClientHandler) Upload(req []byte) error {
 		log.Error("Download send file error: %s", err.Error())
 		return errors.New("Download send file error")
 	}
+	log.Info("Upload handle successful: %s", fileName)
 	return nil
 }
 
