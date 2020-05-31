@@ -5,14 +5,20 @@ import (
 	"errors"
 	"github.com/lishengye/sfs"
 	"net"
+	"path/filepath"
 )
 
 type Client struct {
 	Connection *sfs.Connection
 	token      string
-	Cli        *Cli
+	commandLine        CommandLine
 }
 
+func NewClient(commandLine CommandLine) Client {
+	return Client{
+		commandLine: commandLine,
+	}
+}
 
 func (client *Client) Connect(ip, port string) error {
 	conn, err := net.Dial("tcp", ip+":"+port)
@@ -100,7 +106,7 @@ func (client *Client) Download(fileName string) error {
 
 	if err := client.checkOk(res); err != nil {
 		if res[0] == 2 {
-			client.Cli.Warn(err.Error())
+			client.commandLine.Error(err.Error())
 			return nil
 		}
 		return err
@@ -110,7 +116,7 @@ func (client *Client) Download(fileName string) error {
 
 	fileTransfer := FileTransfer{
 		connection: client.Connection,
-		Cli:		client.Cli,
+		CommandLine:		client.commandLine,
 		FileSize:   fileSize,
 		FileName:   fileName,
 	}
@@ -120,7 +126,8 @@ func (client *Client) Download(fileName string) error {
 	return err
 }
 
-func (client *Client) Upload(fileName string, fileSize uint64) error {
+func (client *Client) Upload(filePath string, fileSize uint64) error {
+	dir, fileName := filepath.Dir(filePath), filepath.Base(filePath)
 	req := make([]byte, 8+8+8+len(fileName))
 
 	copy(req[0:8], []byte(sfs.MethodUpload))
@@ -144,7 +151,7 @@ func (client *Client) Upload(fileName string, fileSize uint64) error {
 
 	if err := client.checkOk(res); err != nil {
 		if res[0] == 3 {
-			client.Cli.Warn(err.Error())
+			client.commandLine.Warn(err.Error())
 		} else {
 			return err
 		}
@@ -152,7 +159,8 @@ func (client *Client) Upload(fileName string, fileSize uint64) error {
 
 	fileTransfer := FileTransfer{
 		connection: client.Connection,
-		Cli:  		client.Cli,
+		CommandLine:  		client.commandLine,
+		DownloadPath: dir,
 		FileName:   fileName,
 		FileSize:   fileSize,
 	}

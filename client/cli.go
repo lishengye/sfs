@@ -3,39 +3,55 @@ package client
 import (
 	"bufio"
 	"fmt"
+	"github.com/fatih/color"
 	"os"
 	"strings"
 )
 
-type Cli struct {
+type CommandLine struct {
+	cyan	func(a ...interface{})
+	info    func(a ...interface{})
+	error   func(a ...interface{})
+	warn   func(a ...interface{})
 }
 
-
-func (cli *Cli) Promt(s string) {
-	fmt.Printf(">>> %s", s)
+func NewCommandLine() CommandLine {
+	return CommandLine{
+		cyan:	color.New(color.FgCyan).PrintFunc(),
+		info:	color.New(color.FgBlue).PrintFunc(),
+		error:	color.New(color.FgRed).PrintFunc(),
+		warn:	color.New(color.FgYellow).PrintFunc(),
+	}
 }
 
-func (cli *Cli) Info(s string) {
+func (cli *CommandLine) Promt(s string) {
+	cli.cyan(">>>")
+	fmt.Printf(" %s", s)
+}
+
+func (cli *CommandLine) Info(s string) {
 	fmt.Printf("[Info] %s\n", s)
 }
 
-func (cli *Cli) Error(s string) {
-	fmt.Printf("[Error] %s\n", s)
+func (cli *CommandLine) Error(s string) {
+	cli.error("[Error]")
+	fmt.Printf(" %s\n", s)
 }
 
-func (cli *Cli) Warn(s string) {
-	fmt.Printf("[Warn] %s\n", s)
+func (cli *CommandLine) Warn(s string) {
+	cli.warn("[Warn]")
+	fmt.Printf(" %s\n", s)
 }
 
-func (cli *Cli) Print(s string) {
+func (cli *CommandLine) Print(s string) {
 	fmt.Printf(s)
 }
 
-func (cli *Cli) PrintLn(s string) {
+func (cli *CommandLine) PrintLn(s string) {
 	fmt.Println(s)
 }
 
-func (cli *Cli) GetComand() []string {
+func (cli *CommandLine) GetComand() []string {
 	reader := bufio.NewReader(os.Stdin)
 	text, _ := reader.ReadString('\n')
 	return strings.Fields(text)

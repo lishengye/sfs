@@ -10,7 +10,7 @@ import (
 
 type FileTransfer struct {
 	connection   *sfs.Connection
-	Cli			 *Cli
+	CommandLine			 CommandLine
 	DownloadPath string
 	FileSize     uint64
 	FileName     string
@@ -176,7 +176,7 @@ func (fileTransfer *FileTransfer) ReceiveFile() error {
 	}
 
 	if _, err := os.Stat(filepath.Join(fileTransfer.DownloadPath, fileTransfer.FileName)); err == nil {
-		fileTransfer.Cli.Warn("Overwriting file with the same name in server")
+		fileTransfer.CommandLine.Warn("Overwriting file with the same name in local")
 	}
 	// todo downloadpath
 	if err := os.Rename(filepath.Join(fileTransfer.DownloadPath, tempFile),
