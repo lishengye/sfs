@@ -1,6 +1,8 @@
 package sfs
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+)
 
 func Max(a int, b int) int {
 	if a > b {

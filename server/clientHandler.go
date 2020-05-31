@@ -32,19 +32,16 @@ func (clientHandler *ClientHandler) Handle() {
 			log.Error("Receive command error")
 			return
 		}
-
-		switch string(data[:8]) {
-		case sfs.MethodList:
+		method := string(data[:8])
+		if method[:len(sfs.MethodList)] == sfs.MethodList {
 			err = clientHandler.List(data)
-		case sfs.MethodDownload:
+		} else if method[:len(sfs.MethodDownload)] == sfs.MethodDownload {
 			err = clientHandler.Download(data)
-		case sfs.MethodUpload:
+		} else if method[:len(sfs.MethodUpload)] == sfs.MethodUpload {
 			err = clientHandler.Upload(data)
-		case sfs.MethodExit:
+		} else if method[:len(sfs.MethodExit)] == sfs.MethodExit {
 			err = clientHandler.Exit()
-			return
-		}
-		if err != nil {
+		} else {
 			log.Error(err.Error())
 			return
 		}
@@ -68,7 +65,8 @@ func (clientHandler *ClientHandler) HandShake() error {
 	}
 
 	method := string(req[:8])
-	if method != sfs.MethodConnect {
+	// 坑
+	if method[:len(sfs.MethodConnect)] != sfs.MethodConnect {
 		log.Error("Handshake not connect command: %s, %s", method, sfs.MethodConnect)
 		return errors.New("invalid command")
 	}
@@ -89,7 +87,7 @@ func (clientHandler *ClientHandler) HandShake() error {
 	}
 	password := string(req[16+userLen : 16+userLen+passLen])
 
-	if sfs.CheckUser(userName, password) {
+	if !sfs.CheckUser(userName, password) {
 		errMsg := "Uncorrect User/Pass"
 		res := append([]byte{1}, []byte(errMsg)...)
 		if err := clientHandler.connection.SendMsg(res); err != nil {

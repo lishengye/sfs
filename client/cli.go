@@ -12,19 +12,23 @@ type Cli struct {
 
 
 func (cli *Cli) Promt(s string) {
-	fmt.Println(">>> %s", s)
+	fmt.Printf(">>> %s", s)
 }
 
 func (cli *Cli) Info(s string) {
-	fmt.Println("[Info] %s", s)
+	fmt.Printf("[Info] %s\n", s)
 }
 
 func (cli *Cli) Error(s string) {
-	fmt.Println("[Error] %s", s)
+	fmt.Printf("[Error] %s\n", s)
 }
 
 func (cli *Cli) Print(s string) {
-	fmt.Printf("Enter password:")
+	fmt.Printf(s)
+}
+
+func (cli *Cli) PrintLn(s string) {
+	fmt.Printf(s)
 }
 
 func (cli *Cli) GetComand() []string {

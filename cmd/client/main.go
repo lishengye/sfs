@@ -20,7 +20,7 @@ func main() {
 		return
 	}
 
-	cli.Print("Enter password")
+	cli.Print("Enter password: ")
 	pass := cli.GetComand()[0]
 
 
@@ -47,7 +47,7 @@ func main() {
 				cli.Error("List error "+err.Error())
 				return
 			} else {
-				cli.Print(res)
+				cli.PrintLn(res)
 			}
 		} else if command[0] == "download"{
 			if n != 2 {

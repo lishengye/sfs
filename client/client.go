@@ -52,7 +52,7 @@ func (client *Client) Handshake(username, password string) error {
 		return err
 	}
 
-	if res[0] != 0 || string(res[1:]) != "ok" {
+	if client.checkOk(res) != nil{
 		return errors.New(string(res[1:]))
 	}
 
