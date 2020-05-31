@@ -17,7 +17,7 @@ func main() {
 
 	config, err := server.NewConfig(*configFile)
 	if err != nil {
-		log.Error("Read ConfigFile error")
+		log.Error("Read ConfigFile error: %s", err.Error())
 		return
 	}
 	sfsServer := server.NewServer(config)
