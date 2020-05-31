@@ -54,9 +54,9 @@ go build -o ./output/sfc  ./cmd/client
 sfs -c sfs.json
 ```
 
-sfs为配置文件，指定运行端口和工作目录
+sfs.json为配置文件，指定运行端口和工作目录
 
-运行为daemon，Linux：
+Linux中运行为daemon：
 
 ```
 nohup ./sfs -c sfs.json > log.txt 2>&1 &
@@ -67,7 +67,7 @@ nohup ./sfs -c sfs.json > log.txt 2>&1 &
 运行
 
 ```
-sfc -s remote_ip -p 6679 -u usename
+sfc -s remote_ip -p 6679 -u username
 
 -s：服务端ip
 
@@ -76,7 +76,7 @@ sfc -s remote_ip -p 6679 -u usename
 -u：用户名
 ```
 
-进入交互命令行，支持的命令有
+进入交互式命令行，支持的命令有
 
 ```
 list，download，upload，exit，help
